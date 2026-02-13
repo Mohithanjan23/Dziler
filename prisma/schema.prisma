@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String // Hashed
+  apiKeys   ApiKey[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  tier      String   @default("free") // free, pro, enterprise
+  isActive  Boolean  @default(true)
+  requests  Int      @default(0) // Simplified tracking
+  createdAt DateTime @default(now())
+  lastUsed  DateTime? 
+}
+
+// Design System Models
+model Palette {
+  id        String   @id @default(uuid())
+  name      String
+  colors    Json     // Array of color objects
+  mood      String?
+  creatorId String?  // Optional relation to User if logged in
+  createdAt DateTime @default(now())
+}
